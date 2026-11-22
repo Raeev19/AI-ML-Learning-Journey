@@ -4,6 +4,60 @@ from datetime import datetime
 
 manager = ExpenseManager()
 
+def validate_amount(amount):
+    try:
+        amount = float(amount)
+        if amount <= 0:
+            raise ValueError("Amount must be greater than 0!")
+        return amount
+    except ValueError as e:
+        print(f"Invalid amount: {e}")
+        return None
+
+def validate_category(category):
+    if not category.strip():
+        print("Category cannot be empty!")
+        return None
+    return category.strip()
+
+def validate_description(description):
+    if not description.strip():
+        print("Description cannot be empty!")
+        return None
+    return description.strip()    
+
+def validate_date(date):
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+        return date
+    except ValueError:
+        print("Invalid date! Please enter in YYYY-MM-DD format.")
+        return None
+
+def validate_expense_number(number, max_index):
+    try:
+        number = int(number)
+        if 1 <= number <= max_index:
+            return number
+        else:
+            print(f"Invalid number! Please enter a number between 1 and {max_index}.")
+            return None
+    except ValueError:
+        print("Invalid input! Please enter a valid number.")
+        return None
+
+def validate_month(month):
+    try:
+        month = int(month)
+        if 1 <= month <= 12:
+            return str(month).zfill(2)
+        else:
+            print("Invalid month! Please enter a number between 1 and 12.")
+            return None
+    except ValueError:
+        print("Invalid input! Please enter a valid number.")
+        return None    
+
 while True:
     print("\n===== PERSONAL EXPENSE TRACKER =====")
     print("1. Add Expense")
@@ -22,46 +76,27 @@ while True:
 
         # Amount Validation
         while True:
-            try:
-                amount = float(input("Enter amount: "))
-
-                if amount <= 0:
-                    print("Amount must be greater than 0!")
-                else:
-                    break
-
-            except ValueError:
-                print("Invalid amount! Please enter numbers only.")
+         amount = validate_amount(input("Enter amount: "))
+         if amount is not None:
+           break
 
         # Category Validation
         while True:
-            category = input("Enter category: ").strip()
-
-            if category:
-                break
-            else:
-                print("Category cannot be empty!")
+          category = validate_category(input("Enter category: "))
+          if category is not None:
+           break
 
         # Description Validation
         while True:
-            description = input("Enter description: ").strip()
-
-            if description:
-                break
-            else:
-                print("Description cannot be empty!")
+          description = validate_description(input("Enter description: "))
+          if description is not None:
+            break
 
         # Date Validation
         while True:
-            date = input("Enter date (YYYY-MM-DD): ")
-
-            try:
-                datetime.strptime(date, "%Y-%m-%d")
-                print("Valid date!")
-                break
-
-            except ValueError:
-                print("Invalid date! Please enter again.")
+         date = validate_date(input("Enter date (YYYY-MM-DD): "))
+         if date is not None:
+          break
 
         # Create and Save Expense
         expense = Expense(amount, category, description, date)
@@ -91,26 +126,22 @@ while True:
 
     # 5. Delete Expense
     elif choice == "5":
-        expenses = manager.get_expenses()
+     expenses = manager.get_expenses()
 
-        if not expenses:
-            print("No expenses found!")
-        else:
-            for i, expense in enumerate(expenses, start=1):
-                print(i, expense)
+     if not expenses:
+        print("No expenses found!")
+     else:
+        for i, expense in enumerate(expenses, start=1):
+            print(i, expense)
 
-            try:
-                index = int(input("Enter expense number to delete: "))
+        index = validate_expense_number(
+            input("Enter expense number to delete: "),
+            len(expenses)
+        )
 
-                if 1 <= index <= len(expenses):
-                    manager.delete_expense(index - 1)
-                    manager.save_expenses()
-                else:
-                    print("Invalid expense number!")
-
-            except ValueError:
-                print("Please enter a valid number!")
-
+        if index is not None:
+            manager.delete_expense(index - 1)
+            manager.save_expenses()
     # 6. Search Expense 
     elif choice == "6":
       search_category = input("Enter category to search: ").strip()
@@ -160,7 +191,7 @@ while True:
         if category_summary:
             print("\nCategory-wise Expense Summary:")
             for category, total in category_summary.items():
-                print(f"{category}: ${total:.2f}")
+                print(f"{category}: ₹{total:.2f}")
         else:
             print("No expenses found!")
 
